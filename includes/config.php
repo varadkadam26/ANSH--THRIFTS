@@ -118,3 +118,12 @@ define('UPLOAD_URL', 'static/images/uploads');
 if (!is_dir(UPLOAD_DIR)) {
     @mkdir(UPLOAD_DIR, 0755, true);
 }
+
+// Mail & SMTP Configuration
+define('MAIL_SERVER', (string)env('MAIL_SERVER', 'smtp.gmail.com'));
+define('MAIL_PORT', (int)env('MAIL_PORT', 465));
+define('MAIL_USERNAME', (string)env('MAIL_USERNAME', 'mitramsolutions@gmail.com'));
+define('MAIL_PASSWORD', (string)env('MAIL_PASSWORD', ''));
+define('MAIL_FROM_ADDRESS', (string)env('MAIL_FROM_ADDRESS', MAIL_USERNAME));
+define('MAIL_FROM_NAME', (string)env('MAIL_FROM_NAME', APP_NAME));
+define('CONTACT_RECIPIENT', (string)env('CONTACT_RECIPIENT', 'mitramsolutions@gmail.com'));
