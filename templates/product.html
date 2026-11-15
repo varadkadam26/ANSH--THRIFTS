@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block hero %}{% endblock %}
+
+{% block body %}
+<div class="container page-content" style="margin-top: 100px;">
+  <div class="row g-4 align-items-start">
+    <!-- Product Image -->
+    <div class="col-12 col-md-6">
+      <div class="product-image">
+        <img src="{{ url_for('static', filename='images/' + product.img_file) }}"
+             alt="{{ product.p_name }}" class="img-fluid rounded-3 w-100"
+             style="object-fit: cover; max-height: 500px;">
+      </div>
+    </div>
+
+    <!-- Product Details -->
+    <div class="col-12 col-md-6">
+      <h1 class="product-name">{{ product.p_name }}</h1>
+      <p class="text-muted mb-3" style="font-size: 1.05rem; line-height: 1.8;">{{ product.p_details }}</p>
+      <h2 style="color: #d4a855; font-family: 'Inter', sans-serif; font-weight: 700;">₹{{ product.p_price }}</h2>
+
+      <div class="d-flex flex-wrap gap-2 mt-4">
+        <form action="{{ url_for('add_to_cart', product_id=product._id) }}" method="POST">
+          <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+        </form>
+        <a href="/shop" class="btn btn-white-outline btn-lg" style="border-color: #ddd; color: #333;">Continue Shopping</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

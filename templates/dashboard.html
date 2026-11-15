@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ANSH THRIFTS · Dashboard</title>
+
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+  <style>
+    body {
+      background: url('{{ url_for("static", filename="images/login-img.jpg") }}') no-repeat center center/cover;
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="custom-navbar navbar navbar-expand-md navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">ANSH THRIFTS<span>.</span></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdmin">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarAdmin">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('admin') }}">Add Product</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  {% include "_flash_messages.html" %}
+
+  <!-- Dashboard -->
+  <div class="container" style="margin-top: 100px; margin-bottom: 60px;">
+    <div class="dashboard-wrapper">
+      <div class="glass-effect p-4">
+        <h1 class="text-center mb-4" style="font-family: 'Playfair Display', serif; color: #1a1a1a;">Admin Dashboard</h1>
+
+        <!-- Desktop table -->
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>Image</th>
+                <th>Product</th>
+                <th class="d-none d-md-table-cell">Price</th>
+                <th class="d-none d-lg-table-cell">Details</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for product in products %}
+              <tr>
+                <td class="text-center">
+                  <img src="{{ url_for('static', filename='images/' ~ product.img_file) }}"
+                       alt="{{ product.p_name }}" width="80" height="80"
+                       class="img-thumbnail" style="object-fit: cover; border-radius: 10px;">
+                </td>
+                <td>
+                  <strong>{{ product.p_name }}</strong>
+                  <span class="d-md-none d-block text-muted small">₹{{ product.p_price }}</span>
+                </td>
+                <td class="d-none d-md-table-cell">₹{{ product.p_price }}</td>
+                <td class="d-none d-lg-table-cell small text-muted">{{ product.p_details }}</td>
+                <td>
+                  <div class="d-flex gap-1 flex-wrap">
+                    <a href="{{ url_for('edit_product', product_id=product._id) }}" class="btn btn-primary btn-sm">Edit</a>
+                    <form action="{{ url_for('delete_product', product_id=product._id) }}" method="POST" style="display:inline;">
+                      <button type="submit" class="btn btn-danger btn-sm"
+                              onclick="return confirm('Delete this product?');">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="text-center mt-3">
+          <a href="{{ url_for('admin') }}" class="btn btn-secondary">Add New Product</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer-section">
+    <div class="container text-center">
+      <p class="mb-0">&copy; <script>document.write(new Date().getFullYear());</script> ANSH THRIFTS. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+
+</html>

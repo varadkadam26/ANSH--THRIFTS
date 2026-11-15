@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block hero %}{% endblock %}
+
+{% block body %}
+<div class="container page-content" style="margin-top: 100px; margin-bottom: 60px;">
+  <h2 class="section-heading text-center mb-4">Your Cart</h2>
+
+  {% if cart %}
+  <!-- Desktop table view -->
+  <div class="d-none d-md-block">
+    <table class="table table-hover align-middle cart-table">
+      <thead class="table-dark">
+        <tr>
+          <th>Image</th>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Total</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart %}
+        <tr>
+          <td>
+            <img src="{{ url_for('static', filename='images/' + item['image']) }}"
+                 alt="{{ item['name'] }}" class="img-thumbnail" width="80" height="80"
+                 style="object-fit: cover; border-radius: 10px;">
+          </td>
+          <td><strong>{{ item['name'] }}</strong></td>
+          <td>₹{{ item['price'] }}</td>
+          <td>
+            <form method="POST" action="{{ url_for('update_cart_quantity', item_id=item['id']) }}"
+                  class="d-flex align-items-center gap-2">
+              <input type="number" name="quantity" value="{{ item['quantity'] }}"
+                     min="1" class="form-control form-control-sm text-center" style="width: 70px;">
+              <button type="submit" class="btn btn-outline-primary btn-sm">Update</button>
+            </form>
+          </td>
+          <td><strong>₹{{ item['price'] * item['quantity'] }}</strong></td>
+          <td>
+            <form method="POST" action="{{ url_for('remove_from_cart_2', p_no=item['id']) }}">
+              <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile card view -->
+  <div class="d-md-none">
+    {% for item in cart %}
+    <div class="card mb-3">
+      <div class="card-body d-flex gap-3 align-items-center">
+        <img src="{{ url_for('static', filename='images/' + item['image']) }}"
+             alt="{{ item['name'] }}" width="72" height="72"
+             style="object-fit: cover; border-radius: 10px; flex-shrink: 0;">
+        <div class="flex-grow-1">
+          <h6 class="mb-1">{{ item['name'] }}</h6>
+          <p class="mb-1 text-muted" style="font-size: 0.85rem;">₹{{ item['price'] }} × {{ item['quantity'] }}</p>
+          <strong style="color: #d4a855;">₹{{ item['price'] * item['quantity'] }}</strong>
+        </div>
+        <div class="d-flex flex-column gap-1">
+          <form method="POST" action="{{ url_for('update_cart_quantity', item_id=item['id']) }}"
+                class="d-flex gap-1">
+            <input type="number" name="quantity" value="{{ item['quantity'] }}"
+                   min="1" class="form-control form-control-sm text-center" style="width: 55px;">
+            <button type="submit" class="btn btn-outline-primary btn-sm">✓</button>
+          </form>
+          <form method="POST" action="{{ url_for('remove_from_cart_2', p_no=item['id']) }}">
+            <button type="submit" class="btn btn-danger btn-sm w-100">Remove</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Total & Checkout -->
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-4 p-3 rounded-3" style="background: #f9f9f6;">
+    <h4 class="mb-3 mb-sm-0" style="font-family: 'Inter', sans-serif;">Total: <strong style="color: #d4a855;">₹{{ total_price }}</strong></h4>
+    <button id="rzp-button" class="btn btn-secondary btn-lg" onclick="payWithRazorpay()">
+      Pay with Razorpay
+    </button>
+  </div>
+
+  {% else %}
+  <div class="text-center p-5">
+    <h3 class="text-muted mb-3">Your cart is empty</h3>
+    <a href="{{ url_for('shop') }}" class="btn btn-primary">Continue Shopping</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if cart %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  function payWithRazorpay() {
+    const btn = document.getElementById('rzp-button');
+    btn.disabled = true;
+    btn.textContent = 'Processing…';
+
+    fetch("{{ url_for('create_order') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        alert("Error: " + data.error);
+        resetBtn();
+        return;
+      }
+      const rzp = new Razorpay({
+        key: data.key_id,
+        amount: data.amount,
+        currency: data.currency,
+        name: "ANSH THRIFTS",
+        description: "Order Payment",
+        order_id: data.order_id,
+        handler: verifyPayment,
+        theme: { color: "#d4a855" },
+        modal: { ondismiss: resetBtn }
+      });
+      rzp.open();
+    })
+    .catch(() => { alert("Something went wrong. Please try again."); resetBtn(); });
+  }
+
+  function verifyPayment(response) {
+    fetch("{{ url_for('verify_payment') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature: response.razorpay_signature
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        alert("Payment successful! Order placed.");
+        window.location.href = "{{ url_for('home') }}";
+      } else {
+        alert("Payment verification failed: " + data.error);
+        resetBtn();
+      }
+    })
+    .catch(() => { alert("Error verifying payment."); resetBtn(); });
+  }
+
+  function resetBtn() {
+    const btn = document.getElementById('rzp-button');
+    btn.disabled = false;
+    btn.textContent = 'Pay with Razorpay';
+  }
+</script>
+{% endif %}
+{% endblock %}

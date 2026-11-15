@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+static/images/uploads/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+.DS_Store
