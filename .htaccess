@@ -1,0 +1,50 @@
+# ANSH THRIFTS — Apache / Hostinger Web Server Configuration
+
+# Disable Directory Browsing
+Options -Indexes
+
+# Follow Symbolic Links
+Options +FollowSymLinks
+
+# Enable Rewrite Engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Block direct access to credentials, configuration and sensitive files
+    RewriteRule ^credentials\.json$ - [F,L,NC]
+    RewriteRule ^config\.json$ - [F,L,NC]
+    RewriteRule ^\.env$ - [F,L,NC]
+    RewriteRule ^\.env\..*$ - [F,L,NC]
+    RewriteRule ^\.git.* - [F,L,NC]
+    RewriteRule ^composer\.(json|lock)$ - [F,L,NC]
+    RewriteRule ^static/images/uploads/.*\.php$ - [F,L,NC]
+
+    # Clean URL routing for storefront
+    # Product slug rewrite: /product/slug -> /product.php?slug=slug
+    RewriteRule ^product/([a-zA-Z0-9_-]+)/?$ product.php?slug=$1 [QSA,L]
+
+    # Clean URLs without .php extension
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^(.*)$ $1.php [QSA,L]
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Protect PHP Error Logs and Credentials
+<FilesMatch "^(credentials\.json|\.env|\.env\.example|config\.json|\.gitignore)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Character encoding
+AddDefaultCharset UTF-8
+

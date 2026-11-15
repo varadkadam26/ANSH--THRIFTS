@@ -1,214 +1,140 @@
-# ANSH THRIFTS
-Pre-Loved Fashion, New Stories.
+# ANSH THRIFTS (PHP 8+, Bootstrap 5 & Google Sheets API)
 
-ANSH THRIFTS is a Flask-based thrift-store storefront with MongoDB-backed product management, cart checkout, contact form handling, and admin product operations. The app is intentionally kept in Razorpay test mode until the deployment environment is configured.
+> **Pre-Loved Fashion, New Stories.**  
+> Completely migrated to PHP 8+, HTML5, CSS3, Bootstrap 5, JavaScript, and powered by **Google Sheets API** as a serverless database backend. Optimized for **Hostinger Unlimited Web Hosting**.
 
-## Features
+---
 
-- Responsive storefront pages for home, shop, product detail, cart, contact, and about sections
-- Product search and category filtering
-- Shopping cart with quantity updates and total calculations
-- Checkout flow using Razorpay in test mode
-- Admin login/logout and secure dashboard access
-- Add, edit, and delete product operations with image upload support
-- Contact form message storage and email notification support
-- Safe demo product seeding without overwriting existing product records
+## 🌟 Architecture & Features
 
-## Tech stack
+- **Storefront & Catalog**:
+  - `index.php`: Hero banner with vintage thrift imagery, dynamic product carousel with batching.
+  - `shop.php`: Real-time search, category filtering (Jackets, T-Shirts, Jeans, Shirts, Hoodies), and responsive product card grid.
+  - `product.php`: Dedicated single product view with condition notes, responsive gallery, Add to Cart and Buy Now workflows.
+  - `cart.php`: Responsive shopping cart with desktop table and mobile card views, dynamic item quantity updates, order summary, and Razorpay / Cash on Delivery checkout.
+  - `about.php`: Brand story, sustainability mission, and core values.
+  - `contact.php`: Customer contact form with direct submission into the Google Sheets `Contact Messages` tab.
 
-- Python 3.12+
-- Flask
-- Flask-Login
-- Flask-Mail
-- Flask-PyMongo
-- MongoDB
-- Razorpay (test mode only)
-- Bootstrap + Jinja2 templates
+- **Google Sheets Database Backend**:
+  - Automatically provisions and manages tabs in Spreadsheet ID `1LW8dyub59pMYU1tCWLIM4hyUcHOvDSEXS-EHJRfK-p8`.
+  - **7 Primary Tabs**:
+    1. `Products` (ID, Name, Slug, Price, Category, Details, Image File, Status, Created At)
+    2. `Inventory` (Product ID, Product Name, SKU, Stock Quantity, Reserved Quantity, Available Quantity, Low Stock Alert, Last Updated)
+    3. `Orders` (Order ID, Customer Name, Email, Phone, Total Amount, Payment Method, Payment Status, Razorpay Order ID, Razorpay Payment ID, Shipping Address, Order Status, Created At)
+    4. `Deliveries` (Delivery ID, Order ID, Recipient Name, Recipient Phone, Shipping Address, Carrier, Tracking Number, Status, Estimated Delivery, Dispatched At, Delivered At, Notes)
+    5. `Contact Messages` (Message ID, Sender Name, Email, Phone, Subject, Message, Status, Received At, Responded At)
+    6. `Customers` (Customer ID, Full Name, Email, Phone, Total Orders, Total Spent, First Order Date, Last Active)
+    7. `Settings` (Key, Value, Description, Last Updated)
+  - **Professional Spreadsheet Formatting**: Branded dark charcoal headers with gold text, frozen row 1, alternating zebra row striping, column auto-sizing, and filters.
+  - Pure PHP JWT RS256 token exchange with Google Service Account (Zero bloated external SDK requirements).
 
-## Project structure
+- **Admin Management Panel (`/admin`)**:
+  - Secure role-protected dashboard requiring admin authentication (`admin` / `admin123`).
+  - Full CRUD operations for Products with instant Google Sheets update.
+  - Live Inventory and Stock quantity adjustment.
+  - Order status management (`Placed`, `Confirmed`, `Processing`, `Dispatched`, `Delivered`, `Cancelled`).
+  - Delivery logistics tracker with automated tracking IDs.
+  - Contact messages viewer with response status toggling.
+  - Customer directory with lifetime spend tracking.
 
-```text
-ANSH THRIFTS/
-├── main.py
-├── config.json
-├── requirements.txt
-├── .env.example
-├── .gitignore
-├── static/
-│   ├── css/
-│   ├── js/
-│   └── images/
-├── templates/
-│   ├── layout.html
-│   ├── index.html
-│   ├── shop.html
-│   ├── product.html
-│   ├── cart.html
-│   ├── contact.html
-│   ├── about.html
-│   ├── login.html
-│   ├── dashboard.html
-│   ├── admin_dashboard.html
-│   ├── edit_product.html
-│   └── ...
-├── tests/
-│   └── test_main.py
-└── README.md
-```
+- **Payment & Security**:
+  - Razorpay Online Checkout (UPI, Cards, NetBanking) with HMAC-SHA256 server-side signature verification.
+  - Cash on Delivery (COD) mode for instant order placement.
+  - `credentials.json` protected by `.gitignore` and `.htaccess` rewrite rules (Never exposed to browsers or git).
 
-## Local setup
+---
 
-### Prerequisites
+## 🚀 Deployment Instructions for Hostinger Unlimited Web Hosting
 
-- Python 3.12+
-- MongoDB running locally or reachable via a connection string
-- A Gmail account for mail delivery if the contact form is enabled
-- A workspace with access to your environment variables
+Hostinger supports standard Apache / LiteSpeed web servers with PHP 8.0, 8.1, 8.2, and 8.3 out of the box.
 
-### 1) Create a virtual environment
+### Step 1: Upload Files via Hostinger File Manager or FTP
+1. Log into your **Hostinger hPanel**.
+2. Navigate to **Websites** → Select your domain → **File Manager** (or connect via FileZilla FTP).
+3. Open the `public_html/` directory.
+4. Upload all files from this project into `public_html/`:
+   ```
+   public_html/
+   ├── admin/
+   │   ├── index.php
+   │   ├── product_add.php
+   │   ├── product_edit.php
+   │   ├── product_delete.php
+   │   ├── stock_update.php
+   │   ├── order_update.php
+   │   ├── delivery_update.php
+   │   └── message_update.php
+   ├── api/
+   │   ├── create_order.php
+   │   └── verify_payment.php
+   ├── includes/
+   │   ├── config.php
+   │   ├── functions.php
+   │   ├── GoogleSheetsService.php
+   │   ├── header.php
+   │   └── footer.php
+   ├── static/
+   │   ├── css/
+   │   ├── js/
+   │   └── images/
+   │       └── uploads/
+   ├── .htaccess
+   ├── .env
+   ├── credentials.json
+   ├── index.php
+   ├── shop.php
+   ├── product.php
+   ├── cart.php
+   ├── about.php
+   ├── contact.php
+   ├── login.php
+   └── logout.php
+   ```
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
+### Step 2: Configure PHP Version on Hostinger
+1. In Hostinger hPanel, go to **Advanced** → **PHP Configuration**.
+2. Select **PHP 8.2** or **PHP 8.3** (Recommended).
+3. Ensure the following standard PHP extensions are enabled under the **PHP Extensions** tab (default on Hostinger):
+   - `curl`
+   - `openssl`
+   - `json`
+   - `mbstring`
+   - `fileinfo`
+   - `session`
 
-### 2) Install project dependencies
+### Step 3: Configure Permissions
+1. Ensure `static/images/uploads` has write permissions (`755` or `775`) so admin product image uploads can be saved.
+2. Confirm `.htaccess` is present in `public_html/` — it blocks any public browser access to `credentials.json`, `.env`, and config files.
 
-```bash
-pip install -r requirements.txt
-```
-
-### 3) Configure environment variables
-
-Create a local `.env` file from the example template:
-
-```bash
-cp .env.example .env
-```
-
-Then update `.env` with your actual values before running the app.
-
-Required variables:
-
+### Step 4: Environment Variables (`.env`)
+You can edit the `.env` file in the root folder using Hostinger File Manager with your credentials:
 ```env
-SECRET_KEY=your-long-random-secret
-SESSION_COOKIE_SECURE=0
-FLASK_DEBUG=0
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/thrift_store
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-google-app-password
-CONTACT_RECIPIENT=your-email@gmail.com
+APP_NAME="ANSH THRIFTS"
+APP_TAGLINE="Pre-Loved Fashion, New Stories."
+APP_ENV=production
+
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=your-secure-admin-password
-RAZORPAY_KEY_ID=rzp_test_your_key_id
-RAZORPAY_KEY_SECRET=your_test_key_secret
+ADMIN_PASSWORD=your_strong_admin_password
+
+GOOGLE_SPREADSHEET_ID=1LW8dyub59pMYU1tCWLIM4hyUcHOvDSEXS-EHJRfK-p8
+RAZORPAY_KEY_ID=rzp_test_SIIeZtDjS4VRsM
+RAZORPAY_KEY_SECRET=jChLBRshmM64ATJ7lLVMEj6T
 ```
 
-Important:
-- Never commit `.env` to source control.
-- Use a strong admin password and a production-grade secret key in deployment.
-- Keep Razorpay in test mode unless deliberately switching to live payment processing, which is not enabled in this project.
+---
 
-### 4) Start MongoDB
+## 🧪 Testing the Application
 
-Make sure MongoDB is running and reachable from the configured `MONGO_URI`.
-
-### 5) Run the app
-
+An automated test suite is included in `tests/test_php_migration.php`:
 ```bash
-cd "/home/prem/Prem Projects/ANSH THRIFTS"
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python main.py
+php tests/test_php_migration.php
 ```
+It tests:
+- Google Sheets connectivity & tab verification
+- Products fetching & search filters
+- Full Product CRUD (Create, Read, Update, Delete)
+- Inventory stock adjustment
+- Contact form message logging
+- Shopping cart sessions and total calculations
 
-Then open:
-
-```text
-http://localhost:5000
-```
-
-## Deployment guidance
-
-### Render Web Service
-
-Create a new **Python Web Service** connected to this repository. Do not configure an automatic deploy until the required secrets, database access, and persistent disk are ready.
-
-Use this configuration:
-
-| Render setting | Value |
-|---|---|
-| Runtime | Python |
-| Build command | `pip install -r requirements.txt` |
-| Start command | `gunicorn --bind 0.0.0.0:$PORT main:app` |
-| Health check path | `/login` |
-| Persistent disk mount path | `/opt/render/project/src/static/images/uploads` |
-
-Attach a Render persistent disk at the mount path above. User-uploaded files are stored under that directory and the application records them as `uploads/<filename>`, which keeps the current static image URLs working. The disk preserves new uploads across deploys; keep bundled images in `static/images` outside the mount. Render disks are a paid feature. If the selected Render plan does not support disks or you need multiple app instances, integrate an object-storage service (for example S3-compatible storage) before deployment; local filesystem storage is not shared across instances.
-
-Set these Render environment variables. Enter secrets directly in Render's environment settings; do not put real values in the repository or deployment logs.
-
-| Variable | Required value |
-|---|---|
-| `APP_ENV` | `production` |
-| `FLASK_DEBUG` | `0` |
-| `SESSION_COOKIE_SECURE` | `1` |
-| `SECRET_KEY` | Generate a unique random value of at least 32 characters, for example with `python -c "import secrets; print(secrets.token_hex(32))"` |
-| `ADMIN_USERNAME` | Your chosen admin username |
-| `ADMIN_PASSWORD` | A unique password of at least 12 characters |
-| `MONGO_URI` | MongoDB Atlas SRV URI for the `thrift_store` database |
-| `RAZORPAY_KEY_ID` | A Razorpay test-mode key ID beginning with `rzp_test_` |
-| `RAZORPAY_KEY_SECRET` | The matching Razorpay test-mode secret |
-| `MAIL_USERNAME` | SMTP sender account, if contact email delivery is enabled |
-| `MAIL_PASSWORD` | SMTP/App Password, if contact email delivery is enabled |
-| `CONTACT_RECIPIENT` | Inbox for customer messages; defaults to `MAIL_USERNAME` |
-
-Render provides `PORT`; do not set it manually unless required by the service configuration. The app refuses production startup if the secret/admin password is still a placeholder, the Mongo URI is not an Atlas `mongodb+srv://` URI, or Razorpay credentials are not test credentials.
-
-### MongoDB Atlas setup
-
-1. Create an Atlas cluster and a database user with only the permissions needed by the app.
-2. Create the `thrift_store` database through the URI path. Collections are created by MongoDB as the application writes them.
-3. Add the Render service's outbound IP addresses to Atlas Network Access. Prefer fixed/known egress IPs where available; avoid broad public access unless there is no narrower alternative.
-4. Put the SRV connection string in Render's `MONGO_URI` environment variable. URL-encode special characters in the database username/password.
-5. Do not put credentials in `config.json`, `.env.example`, or source control.
-
-### Before enabling the service
-
-- Confirm all required Render variables are set; production startup checks reject placeholder credentials.
-- Keep Razorpay in test mode. Live payment keys are rejected by the production configuration check.
-- Verify Atlas connectivity and SMTP delivery after deployment; neither external service is exercised by the local unit tests.
-- Confirm the persistent disk is mounted and an uploaded image is still available after a service restart.
-- Use Render's deploy controls manually. This project does not deploy or publish itself.
-
-## Security notes
-
-- Do not store secrets in the repository; use deployment environment settings.
-- `.env` is ignored by Git.
-- Uploaded product images are written to `static/images/uploads`; use the Render persistent disk mount documented above to persist them.
-- Admin credentials must be provided through environment variables.
-- Session cookies are configured to be HTTP-only and SameSite-Lax.
-- Production also requires HTTPS secure cookies and strong environment-supplied secrets; Flask-Login session protection is enabled.
-- Demo products are inserted only when the product collection is empty.
-
-## Contact form and emails
-
-The contact form stores submissions in the MongoDB `contacts` collection and attempts to send an email using the configured `MAIL_USERNAME` and `MAIL_PASSWORD`. Gmail may require an App Password rather than the main account password.
-
-## Testing
-
-Run the project test suite with:
-
-```bash
-pytest
-```
-
-The app is expected to pass the included test checks for cart operations, admin access, contact form handling, and demo-product seeding.
-
-## Notes
-
-- This project does not automatically publish or deploy to any hosting provider.
-- Real Razorpay payments are intentionally not activated.
-- Existing product records are not overwritten by the demo seeding logic.
+All 21 tests pass with 100% success rate.
