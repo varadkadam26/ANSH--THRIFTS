@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/config.php';
 
-function e(?string $string): string {
+function e(mixed $string): string {
     return htmlspecialchars((string)($string ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
