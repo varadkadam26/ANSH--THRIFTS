@@ -11,9 +11,9 @@ Options +FollowSymLinks
     RewriteEngine On
     RewriteBase /
 
-    # Block direct access to credentials, configuration and sensitive files
-    RewriteRule ^credentials\.json$ - [F,L,NC]
-    RewriteRule ^config\.json$ - [F,L,NC]
+    # Block direct access to database dumps, configuration and sensitive files
+    RewriteRule ^database/.*$ - [F,L,NC]
+    RewriteRule ^_backup/.*$ - [F,L,NC]
     RewriteRule ^\.env$ - [F,L,NC]
     RewriteRule ^\.env\..*$ - [F,L,NC]
     RewriteRule ^\.git.* - [F,L,NC]
@@ -39,8 +39,8 @@ Options +FollowSymLinks
     Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# Protect PHP Error Logs and Credentials
-<FilesMatch "^(credentials\.json|\.env|\.env\.example|config\.json|\.gitignore)$">
+# Protect Configuration and Environment Files
+<FilesMatch "^(\.env|\.env\.example|\.gitignore|\.git)$">
     Order allow,deny
     Deny from all
 </FilesMatch>

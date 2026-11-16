@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/includes/GoogleSheetsService.php';
+require_once __DIR__ . '/includes/Database.php';
 
 $pageTitle = 'Shop Collection · ' . APP_NAME;
 $activeNav = 'shop';
@@ -15,8 +15,7 @@ $activeNav = 'shop';
 $search = trim($_GET['q'] ?? '');
 $category = trim($_GET['category'] ?? '');
 
-$sheets = new GoogleSheetsService();
-$products = $sheets->getActiveProducts($search !== '' ? $search : null, $category !== '' ? $category : null);
+$products = getActiveProducts($search !== '' ? $search : null, $category !== '' ? $category : null);
 
 require_once __DIR__ . '/includes/header.php';
 ?>

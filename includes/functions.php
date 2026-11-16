@@ -65,8 +65,7 @@ function requireAdmin(): void {
 
 function isAdminLoggedIn(): bool {
     return !empty($_SESSION['admin_logged_in']) && 
-           isset($_SESSION['admin_username']) && 
-           $_SESSION['admin_username'] === ADMIN_USERNAME;
+           !empty($_SESSION['admin_username']);
 }
 
 /**

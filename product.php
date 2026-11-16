@@ -7,15 +7,14 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/includes/GoogleSheetsService.php';
+require_once __DIR__ . '/includes/Database.php';
 
 $slug = trim($_GET['slug'] ?? '');
 if ($slug === '') {
     redirect('/shop.php');
 }
 
-$sheets = new GoogleSheetsService();
-$product = $sheets->getProductBySlug($slug);
+$product = getProductBySlug($slug);
 
 if (!$product) {
     http_response_code(404);

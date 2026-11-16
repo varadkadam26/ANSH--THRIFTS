@@ -1,37 +1,40 @@
-# ANSH THRIFTS (PHP 8+, Bootstrap 5 & Google Sheets API)
+# ANSH THRIFTS (PHP 8.2+, MySQL / MariaDB & Bootstrap 5)
 
 > **Pre-Loved Fashion, New Stories.**  
-> Completely migrated to PHP 8+, HTML5, CSS3, Bootstrap 5, JavaScript, and powered by **Google Sheets API** as a serverless database backend. Optimized for **Hostinger Unlimited Web Hosting**.
+> Completely migrated to PHP 8.2+, MySQL / MariaDB, PDO prepared statements, HTML5, CSS3, Bootstrap 5, and JavaScript. Fully optimized for **Hostinger Web Hosting**.
 
 ---
 
 ## 🌟 Architecture & Features
 
 - **Storefront & Catalog**:
-  - `index.php`: Hero banner with vintage thrift imagery, dynamic product carousel with batching.
+  - `index.php`: Hero banner with vintage thrift imagery, dynamic newly added thrift pieces carousel with batching.
   - `shop.php`: Real-time search, category filtering (Jackets, T-Shirts, Jeans, Shirts, Hoodies), and responsive product card grid.
   - `product.php`: Dedicated single product view with condition notes, responsive gallery, Add to Cart and Buy Now workflows.
-  - `cart.php`: Responsive shopping cart with desktop table and mobile card views, dynamic item quantity updates, order summary, and Razorpay / Cash on Delivery checkout.
-  - `about.php`: Brand story, sustainability mission, and core values.
-  - `contact.php`: Customer contact form with direct submission into the Google Sheets `Contact Messages` tab.
+  - `cart.php`: Responsive shopping cart with desktop table and mobile card views, dynamic item quantity updates, order summary, and Razorpay / Cash on Delivery checkout with mandatory legal consent.
+  - `about.php`: Brand story, circular fashion mission, and sustainability values.
+  - `contact.php`: Customer contact form with direct database logging and dual-email notification workflow via Gmail SMTP.
 
-- **Google Sheets Database Backend**:
-  - Automatically provisions and manages tabs in Spreadsheet ID `1LW8dyub59pMYU1tCWLIM4hyUcHOvDSEXS-EHJRfK-p8`.
-  - **7 Primary Tabs**:
-    1. `Products` (ID, Name, Slug, Price, Category, Details, Image File, Status, Created At)
-    2. `Inventory` (Product ID, Product Name, SKU, Stock Quantity, Reserved Quantity, Available Quantity, Low Stock Alert, Last Updated)
-    3. `Orders` (Order ID, Customer Name, Email, Phone, Total Amount, Payment Method, Payment Status, Razorpay Order ID, Razorpay Payment ID, Shipping Address, Order Status, Created At)
-    4. `Deliveries` (Delivery ID, Order ID, Recipient Name, Recipient Phone, Shipping Address, Carrier, Tracking Number, Status, Estimated Delivery, Dispatched At, Delivered At, Notes)
-    5. `Contact Messages` (Message ID, Sender Name, Email, Phone, Subject, Message, Status, Received At, Responded At)
-    6. `Customers` (Customer ID, Full Name, Email, Phone, Total Orders, Total Spent, First Order Date, Last Active)
-    7. `Settings` (Key, Value, Description, Last Updated)
-  - **Professional Spreadsheet Formatting**: Branded dark charcoal headers with gold text, frozen row 1, alternating zebra row striping, column auto-sizing, and filters.
-  - Pure PHP JWT RS256 token exchange with Google Service Account (Zero bloated external SDK requirements).
+- **Relational MySQL / MariaDB Database**:
+  - Fully normalized database schema with primary keys, foreign keys (`ON DELETE CASCADE`), indexes, and constraints.
+  - **10 Primary Tables**:
+    1. `products` (ID, Name, Slug, Price, Category, Details, Image File, Status, Created At, Updated At)
+    2. `product_images` (Image ID, Product ID, Image File, Primary Flag, Sort Order, Created At)
+    3. `inventory` (Product ID, SKU, Stock Quantity, Reserved Quantity, Available Quantity, Low Stock Alert, Updated At)
+    4. `customers` (Customer ID, Full Name, Email, Phone, Total Orders, Total Spent, First Order Date, Last Active)
+    5. `orders` (Order ID, Customer ID, Customer Name, Email, Phone, Total Amount, Payment Method, Payment Status, Razorpay Order ID, Razorpay Payment ID, Shipping Address, Order Status, Created At)
+    6. `order_items` (Item ID, Order ID, Product ID, Product Name, Price, Quantity, Created At)
+    7. `deliveries` (Delivery ID, Order ID, Recipient Name, Recipient Phone, Shipping Address, Carrier, Tracking Number, Status, Estimated Delivery, Dispatched At, Delivered At, Notes)
+    8. `contact_messages` (Message ID, Sender Name, Email, Phone, Subject, Message, Status, Received At, Responded At)
+    9. `admins` (Admin ID, Username, Password Hash, Role, Created At, Last Login)
+    10. `settings` (Setting Key, Setting Value, Description, Updated At)
+  - Pure PDO prepared statements with `PDO::ATTR_EMULATE_PREPARES => false` (prevents SQL injection).
+  - Database transactions (`beginTransaction`, `commit`, `rollBack`) for orders and inventory deductions.
 
 - **Admin Management Panel (`/admin`)**:
-  - Secure role-protected dashboard requiring admin authentication (`admin` / `admin123`).
-  - Full CRUD operations for Products with instant Google Sheets update.
-  - Live Inventory and Stock quantity adjustment.
+  - Role-protected dashboard requiring admin authentication (`admin` / `admin123`).
+  - Full CRUD operations for Products with instantaneous database updates.
+  - Live Inventory and Stock quantity management with overselling prevention.
   - Order status management (`Placed`, `Confirmed`, `Processing`, `Dispatched`, `Delivered`, `Cancelled`).
   - Delivery logistics tracker with automated tracking IDs.
   - Contact messages viewer with response status toggling.
@@ -39,102 +42,88 @@
 
 - **Payment & Security**:
   - Razorpay Online Checkout (UPI, Cards, NetBanking) with HMAC-SHA256 server-side signature verification.
+  - Idempotency guard preventing duplicate payment processing and double stock deductions.
   - Cash on Delivery (COD) mode for instant order placement.
-  - `credentials.json` protected by `.gitignore` and `.htaccess` rewrite rules (Never exposed to browsers or git).
+  - Dedicated Legal & Policy section covering Indian thrift fashion: Privacy Policy, Refund Policy, Terms & Conditions, Shipping Policy, Cancellation Policy, Payment Policy, Grievance Redressal, and Contact Information.
 
 ---
 
-## 🚀 Deployment Instructions for Hostinger Unlimited Web Hosting
+## 🚀 Deployment Instructions for Hostinger Web Hosting
 
-Hostinger supports standard Apache / LiteSpeed web servers with PHP 8.0, 8.1, 8.2, and 8.3 out of the box.
+Hostinger supports Apache / LiteSpeed web servers with PHP 8.2+ and MySQL / MariaDB out of the box.
 
-### Step 1: Upload Files via Hostinger File Manager or FTP
+### Step 1: Create Database in Hostinger hPanel
 1. Log into your **Hostinger hPanel**.
-2. Navigate to **Websites** → Select your domain → **File Manager** (or connect via FileZilla FTP).
-3. Open the `public_html/` directory.
-4. Upload all files from this project into `public_html/`:
+2. Go to **Databases** → **Management**.
+3. Create a new MySQL database:
+   - **Database Name**: e.g., `u123456789_ansh`
+   - **Username**: e.g., `u123456789_ansh`
+   - **Password**: Enter a strong password
+4. Note down your Database Name, Username, and Password.
+
+### Step 2: Import Database Schema via phpMyAdmin
+1. In Hostinger hPanel, click **Enter phpMyAdmin** next to your newly created database.
+2. Click the **Import** tab.
+3. Choose the file `database/schema.sql` from your project and click **Import**.
+4. Choose the file `database/seed.sql` and click **Import** to seed the catalog items, inventory, settings, and admin user.
+
+### Step 3: Upload Application Files via File Manager or FTP
+1. Navigate to **Websites** → Select your domain → **File Manager** (or connect via SFTP / FTP).
+2. Open the `public_html/` directory.
+3. Upload all project files into `public_html/`.
+
+### Step 4: Configure Environment Variables (`.env`)
+1. Create or edit the `.env` file in `public_html/` (or one directory above for added security):
+   ```env
+   APP_NAME="ANSH THRIFTS"
+   APP_TAGLINE="Pre-Loved Fashion, New Stories."
+   APP_ENV=production
+
+   # Database Configuration
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_NAME=u123456789_ansh
+   DB_USER=u123456789_ansh
+   DB_PASS=YourDatabasePassword
+   DB_CHARSET=utf8mb4
+
+   # Admin Credentials
+   ADMIN_USERNAME=admin
+   ADMIN_PASSWORD=admin123
+
+   # Razorpay Keys
+   RAZORPAY_KEY_ID=rzp_test_SIIeZtDjS4VRsM
+   RAZORPAY_KEY_SECRET=jChLBRshmM64ATJ7lLVMEj6T
+
+   # Gmail SMTP
+   MAIL_SERVER=smtp.gmail.com
+   MAIL_PORT=465
+   MAIL_USERNAME=mitramsolutions@gmail.com
+   MAIL_PASSWORD=your-gmail-app-password
+   MAIL_FROM_ADDRESS=mitramsolutions@gmail.com
+   MAIL_FROM_NAME="ANSH THRIFTS"
+   CONTACT_RECIPIENT=mitramsolutions@gmail.com
    ```
-   public_html/
-   ├── admin/
-   │   ├── index.php
-   │   ├── product_add.php
-   │   ├── product_edit.php
-   │   ├── product_delete.php
-   │   ├── stock_update.php
-   │   ├── order_update.php
-   │   ├── delivery_update.php
-   │   └── message_update.php
-   ├── api/
-   │   ├── create_order.php
-   │   └── verify_payment.php
-   ├── includes/
-   │   ├── config.php
-   │   ├── functions.php
-   │   ├── GoogleSheetsService.php
-   │   ├── header.php
-   │   └── footer.php
-   ├── static/
-   │   ├── css/
-   │   ├── js/
-   │   └── images/
-   │       └── uploads/
-   ├── .htaccess
-   ├── .env
-   ├── credentials.json
-   ├── index.php
-   ├── shop.php
-   ├── product.php
-   ├── cart.php
-   ├── about.php
-   ├── contact.php
-   ├── login.php
-   └── logout.php
-   ```
 
-### Step 2: Configure PHP Version on Hostinger
-1. In Hostinger hPanel, go to **Advanced** → **PHP Configuration**.
-2. Select **PHP 8.2** or **PHP 8.3** (Recommended).
-3. Ensure the following standard PHP extensions are enabled under the **PHP Extensions** tab (default on Hostinger):
-   - `curl`
-   - `openssl`
-   - `json`
-   - `mbstring`
-   - `fileinfo`
-   - `session`
-
-### Step 3: Configure Permissions
-1. Ensure `static/images/uploads` has write permissions (`755` or `775`) so admin product image uploads can be saved.
-2. Confirm `.htaccess` is present in `public_html/` — it blocks any public browser access to `credentials.json`, `.env`, and config files.
-
-### Step 4: Environment Variables (`.env`)
-You can edit the `.env` file in the root folder using Hostinger File Manager with your credentials:
-```env
-APP_NAME="ANSH THRIFTS"
-APP_TAGLINE="Pre-Loved Fashion, New Stories."
-APP_ENV=production
-
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=your_strong_admin_password
-
-GOOGLE_SPREADSHEET_ID=1LW8dyub59pMYU1tCWLIM4hyUcHOvDSEXS-EHJRfK-p8
-RAZORPAY_KEY_ID=rzp_test_SIIeZtDjS4VRsM
-RAZORPAY_KEY_SECRET=jChLBRshmM64ATJ7lLVMEj6T
-```
+### Step 5: Configure Permissions & PHP Version
+1. Ensure `static/images/uploads` has write permissions (`755`).
+2. Verify PHP version is set to **PHP 8.2** or **PHP 8.3** in **Advanced** → **PHP Configuration**.
+3. Confirm `.htaccess` is present in `public_html/` — it blocks any public browser access to `.env`, `database/`, and uploaded scripts.
 
 ---
 
 ## 🧪 Testing the Application
 
-An automated test suite is included in `tests/test_php_migration.php`:
+Automated test suites are included:
 ```bash
-php tests/test_php_migration.php
-```
-It tests:
-- Google Sheets connectivity & tab verification
-- Products fetching & search filters
-- Full Product CRUD (Create, Read, Update, Delete)
-- Inventory stock adjustment
-- Contact form message logging
-- Shopping cart sessions and total calculations
+# Full MySQL Migration & Storefront Test Suite (53 Tests)
+php tests/test_mysql_migration.php
 
-All 21 tests pass with 100% success rate.
+# Complete 9-Directive Production Audit (35 Checks)
+php tests/test_audit.php
+
+# Legal & Policies Verification Suite
+php tests/test_policy_pages.php
+```
+
+All tests pass with 100% success rate.

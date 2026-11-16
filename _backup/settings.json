@@ -1,0 +1,23 @@
+[
+  {
+    "Key": "store_name",
+    "Value": "ANSH THRIFTS",
+    "Description": "The brand name displayed in header and footer"
+  },
+  {
+    "Key": "tagline",
+    "Value": "Pre-Loved Fashion, New Stories.",
+    "Description": "Store tagline for hero banner"
+  },
+  {
+    "Key": "currency",
+    "Value": "INR (₹)",
+    "Description": "Currency symbol and code"
+  },
+  {
+    "Key": "support_email",
+    "Value": "mitramsolutions@gmail.com",
+    "Description": "Recipient email for contact messages"
+  }
+]
+

@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/includes/GoogleSheetsService.php';
+require_once __DIR__ . '/includes/Database.php';
 
 // Handle POST cart operations
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -15,8 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $productId = trim($_POST['product_id'] ?? '');
 
     if ($action === 'add' && $productId !== '') {
-        $sheets = new GoogleSheetsService();
-        $product = $sheets->getRecordById('Products', $productId);
+        $product = getProductById($productId);
         if ($product) {
             $qty = max(1, (int)($_POST['quantity'] ?? 1));
             addToCart($product, $qty);

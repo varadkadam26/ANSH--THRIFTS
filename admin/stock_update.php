@@ -1,13 +1,14 @@
 <?php
 /**
  * ANSH THRIFTS — Admin: Quick Stock Update
+ * Powered by MySQL / MariaDB with PDO prepared statements.
  */
 
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/GoogleSheetsService.php';
+require_once __DIR__ . '/../includes/Database.php';
 
 requireAdmin();
 
@@ -23,25 +24,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($productId !== '') {
         try {
-            $sheets = new GoogleSheetsService();
-            $invRecords = $sheets->getAllRecords('Inventory');
-            foreach ($invRecords as $inv) {
-                if ((string)$inv['Product ID'] === $productId) {
-                    $rowNum = (int)$inv['_row_number'];
-                    $reserved = (int)($inv['Reserved Quantity'] ?? 0);
-                    $available = max(0, $newStock - $reserved);
+            $db = getDb();
+            $stmt = $db->prepare("
+                UPDATE `inventory`
+                SET 
+                    `stock_quantity` = :stock,
+                    `available_quantity` = GREATEST(0, :stock - `reserved_quantity`),
+                    `updated_at` = NOW()
+                WHERE `product_id` = :id
+            ");
+            $stmt->execute([
+                ':stock' => $newStock,
+                ':id' => $productId,
+            ]);
 
-                    $updated = $inv;
-                    $updated['Stock Quantity'] = $newStock;
-                    $updated['Available Quantity'] = $available;
-                    $updated['Last Updated'] = date('Y-m-d H:i:s');
-                    unset($updated['_row_number']);
-
-                    $sheets->updateRecordByRow('Inventory', $rowNum, $updated);
-                    setFlash('success', "Stock updated for {$inv['Product Name']}.");
-                    break;
-                }
-            }
+            setFlash('success', "Stock updated for Product ID {$productId}.");
         } catch (Throwable $e) {
             setFlash('danger', 'Error updating stock: ' . $e->getMessage());
         }

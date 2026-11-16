@@ -1,13 +1,14 @@
 <?php
 /**
  * ANSH THRIFTS — Admin: Update Delivery Status
+ * Powered by MySQL / MariaDB with PDO prepared statements.
  */
 
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/GoogleSheetsService.php';
+require_once __DIR__ . '/../includes/Database.php';
 
 requireAdmin();
 
@@ -23,21 +24,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($deliveryId !== '') {
         try {
-            $sheets = new GoogleSheetsService();
-            $del = $sheets->getRecordById('Deliveries', $deliveryId, 'Delivery ID');
-            if ($del) {
-                $rowNum = (int)$del['_row_number'];
-                $updated = $del;
-                $updated['Status'] = $status;
-                if ($status === 'Dispatched' && empty($updated['Dispatched At'])) {
-                    $updated['Dispatched At'] = date('Y-m-d H:i:s');
-                }
-                if ($status === 'Delivered' && empty($updated['Delivered At'])) {
-                    $updated['Delivered At'] = date('Y-m-d H:i:s');
-                }
-                unset($updated['_row_number']);
+            $db = getDb();
+            $stmt = $db->prepare("SELECT dispatched_at, delivered_at FROM `deliveries` WHERE id = :id");
+            $stmt->execute([':id' => $deliveryId]);
+            $del = $stmt->fetch();
 
-                $sheets->updateRecordByRow('Deliveries', $rowNum, $updated);
+            if ($del) {
+                $dispatchedAt = $del['dispatched_at'];
+                $deliveredAt = $del['delivered_at'];
+
+                if ($status === 'Dispatched' && empty($dispatchedAt)) {
+                    $dispatchedAt = date('Y-m-d H:i:s');
+                }
+                if ($status === 'Delivered' && empty($deliveredAt)) {
+                    $deliveredAt = date('Y-m-d H:i:s');
+                }
+
+                $up = $db->prepare("
+                    UPDATE `deliveries`
+                    SET 
+                        `status` = :status,
+                        `dispatched_at` = :dispatched_at,
+                        `delivered_at` = :delivered_at,
+                        `updated_at` = NOW()
+                    WHERE `id` = :id
+                ");
+                $up->execute([
+                    ':status' => $status,
+                    ':dispatched_at' => $dispatchedAt,
+                    ':delivered_at' => $deliveredAt,
+                    ':id' => $deliveryId,
+                ]);
+
                 setFlash('success', "Delivery #{$deliveryId} updated to {$status}.");
             }
         } catch (Throwable $e) {

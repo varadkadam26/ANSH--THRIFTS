@@ -1,10 +1,12 @@
 {
   "name": "varadkadam26/ansh-thrifts",
-  "description": "ANSH THRIFTS — Pre-Loved Fashion E-commerce Application with Google Sheets Database Backend",
+  "description": "ANSH THRIFTS — Pre-Loved Fashion E-commerce Application with MySQL/MariaDB Backend",
   "type": "project",
   "license": "MIT",
   "require": {
-    "php": ">=8.0",
+    "php": ">=8.2",
+    "ext-pdo": "*",
+    "ext-pdo_mysql": "*",
     "ext-curl": "*",
     "ext-json": "*",
     "ext-openssl": "*",
@@ -15,4 +17,3 @@
     "sort-packages": true
   }
 }
-

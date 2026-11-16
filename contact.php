@@ -1,7 +1,7 @@
 <?php
 /**
  * ANSH THRIFTS — Contact Us Page (contact.php)
- * Handles customer inquiries, saves them directly to Google Sheets "Contact Messages" tab,
+ * Handles customer inquiries, saves them to MySQL database,
  * sends confirmation to customer, and notifies store inbox via Gmail SMTP.
  */
 
@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/includes/GoogleSheetsService.php';
+require_once __DIR__ . '/includes/Database.php';
 require_once __DIR__ . '/includes/SmtpMailer.php';
 
 $pageTitle = 'Contact Us · ' . APP_NAME;
@@ -29,20 +29,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         setFlash('danger', 'Please provide a valid email address.');
     } else {
         try {
-            // 1. Save directly to Google Sheets "Contact Messages" tab
-            $sheets = new GoogleSheetsService();
+            // 1. Save directly to MySQL contact_messages table
+            $db = getDb();
             $msgId = 'MSG-' . date('Ymd') . '-' . rand(100, 999);
             
-            $sheets->insertRecord('Contact Messages', [
-                'Message ID'   => $msgId,
-                'Sender Name'  => $name,
-                'Email'        => $email,
-                'Phone'        => $phone,
-                'Subject'      => $subject,
-                'Message'      => $message,
-                'Status'       => 'New',
-                'Received At'  => date('Y-m-d H:i:s'),
-                'Responded At' => '',
+            $stmt = $db->prepare("
+                INSERT INTO `contact_messages` (`id`, `sender_name`, `email`, `phone`, `subject`, `message`, `status`, `received_at`)
+                VALUES (:id, :sender_name, :email, :phone, :subject, :message, 'New', NOW())
+            ");
+            $stmt->execute([
+                ':id'          => $msgId,
+                ':sender_name' => $name,
+                ':email'       => $email,
+                ':phone'       => $phone,
+                ':subject'     => $subject,
+                ':message'     => $message,
             ]);
 
             // 2. Dispatch Emails via Gmail SMTP

@@ -7,13 +7,12 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/includes/GoogleSheetsService.php';
+require_once __DIR__ . '/includes/Database.php';
 
 $pageTitle = APP_NAME . ' · ' . APP_TAGLINE;
 $activeNav = 'home';
 
-$sheets = new GoogleSheetsService();
-$products = $sheets->getActiveProducts();
+$products = getActiveProducts();
 
 require_once __DIR__ . '/includes/header.php';
 ?>

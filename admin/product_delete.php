@@ -1,13 +1,14 @@
 <?php
 /**
  * ANSH THRIFTS — Admin: Delete Product
+ * Powered by MySQL / MariaDB with PDO prepared statements.
  */
 
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/GoogleSheetsService.php';
+require_once __DIR__ . '/../includes/Database.php';
 
 requireAdmin();
 
@@ -19,13 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $id = trim($_POST['id'] ?? '');
-    $row = (int)($_POST['row'] ?? 0);
 
-    if ($id !== '' && $row > 1) {
+    if ($id !== '') {
         try {
-            $sheets = new GoogleSheetsService();
-            $sheets->deleteRow('Products', $row);
-            setFlash('success', "Product ID {$id} was deleted from Google Sheets.");
+            $db = getDb();
+            $stmt = $db->prepare("DELETE FROM `products` WHERE id = :id");
+            $stmt->execute([':id' => $id]);
+            setFlash('success', "Product ID {$id} was deleted successfully.");
         } catch (Throwable $e) {
             setFlash('danger', 'Error deleting product: ' . $e->getMessage());
         }

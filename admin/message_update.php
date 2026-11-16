@@ -1,13 +1,14 @@
 <?php
 /**
  * ANSH THRIFTS — Admin: Update Message Status
+ * Powered by MySQL / MariaDB with PDO prepared statements.
  */
 
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/GoogleSheetsService.php';
+require_once __DIR__ . '/../includes/Database.php';
 
 requireAdmin();
 
@@ -23,20 +24,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($messageId !== '') {
         try {
-            $sheets = new GoogleSheetsService();
-            $msg = $sheets->getRecordById('Contact Messages', $messageId, 'Message ID');
-            if ($msg) {
-                $rowNum = (int)$msg['_row_number'];
-                $updated = $msg;
-                $updated['Status'] = $status;
-                if ($status === 'Responded') {
-                    $updated['Responded At'] = date('Y-m-d H:i:s');
-                }
-                unset($updated['_row_number']);
+            $db = getDb();
+            $respondedAt = ($status === 'Responded') ? date('Y-m-d H:i:s') : null;
 
-                $sheets->updateRecordByRow('Contact Messages', $rowNum, $updated);
-                setFlash('success', "Message #{$messageId} marked {$status}.");
-            }
+            $stmt = $db->prepare("
+                UPDATE `contact_messages`
+                SET 
+                    `status` = :status,
+                    `responded_at` = :responded_at
+                WHERE `id` = :id
+            ");
+            $stmt->execute([
+                ':status' => $status,
+                ':responded_at' => $respondedAt,
+                ':id' => $messageId,
+            ]);
+
+            setFlash('success', "Message #{$messageId} marked {$status}.");
         } catch (Throwable $e) {
             setFlash('danger', 'Error updating message: ' . $e->getMessage());
         }

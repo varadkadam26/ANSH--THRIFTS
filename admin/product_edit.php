@@ -1,26 +1,36 @@
 <?php
 /**
  * ANSH THRIFTS — Admin: Edit Product
+ * Powered by MySQL / MariaDB with PDO prepared statements.
  */
 
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/GoogleSheetsService.php';
+require_once __DIR__ . '/../includes/Database.php';
 
 requireAdmin();
 
-$sheets = new GoogleSheetsService();
+$db = getDb();
 $id = trim($_GET['id'] ?? '');
 
-$product = $sheets->getRecordById('Products', $id);
+$stmt = $db->prepare("
+    SELECT 
+        id AS `ID`, name AS `Name`, slug AS `Slug`, price AS `Price`, 
+        category AS `Category`, details AS `Details`, image_file AS `Image File`, 
+        status AS `Status`, created_at AS `Created At`
+    FROM `products` 
+    WHERE id = :id 
+    LIMIT 1
+");
+$stmt->execute([':id' => $id]);
+$product = $stmt->fetch();
+
 if (!$product) {
-    setFlash('danger', 'Product not found in Google Sheets.');
+    setFlash('danger', 'Product not found in database.');
     redirect('/admin/index.php?tab=products');
 }
-
-$rowNum = (int)$product['_row_number'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $csrfToken = $_POST['csrf_token'] ?? '';
@@ -34,6 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $details = trim($_POST['details'] ?? '');
     $category = trim($_POST['category'] ?? 'General');
     $status = trim($_POST['status'] ?? 'Active');
+    if (!in_array($status, ['Active', 'Archived'])) {
+        $status = 'Active';
+    }
 
     $imageFile = $product['Image File']; // default to existing
     if (isset($_FILES['img_file']) && $_FILES['img_file']['error'] !== UPLOAD_ERR_NO_FILE) {
@@ -46,23 +59,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $updatedData = [
-            'ID' => $product['ID'],
-            'Name' => $name,
-            'Slug' => $product['Slug'],
-            'Price' => $price,
-            'Category' => $category,
-            'Details' => $details,
-            'Image File' => $imageFile,
-            'Status' => $status,
-            'Created At' => $product['Created At'] ?? date('Y-m-d H:i:s'),
-        ];
+        Database::beginTransaction();
 
-        $sheets->updateRecordByRow('Products', $rowNum, $updatedData);
+        $upStmt = $db->prepare("
+            UPDATE `products`
+            SET 
+                `name` = :name,
+                `price` = :price,
+                `category` = :category,
+                `details` = :details,
+                `image_file` = :image_file,
+                `status` = :status,
+                `updated_at` = NOW()
+            WHERE `id` = :id
+        ");
+        $upStmt->execute([
+            ':name' => $name,
+            ':price' => (float)$price,
+            ':category' => $category,
+            ':details' => $details,
+            ':image_file' => $imageFile,
+            ':status' => $status,
+            ':id' => $id,
+        ]);
 
-        setFlash('success', "Product '{$name}' updated in Google Sheets!");
+        // Keep product_images in sync
+        $imgStmt = $db->prepare("
+            INSERT INTO `product_images` (`product_id`, `image_file`, `is_primary`, `sort_order`, `created_at`)
+            VALUES (:product_id, :image_file, 1, 0, NOW())
+            ON DUPLICATE KEY UPDATE `is_primary` = 1
+        ");
+        $imgStmt->execute([
+            ':product_id' => $id,
+            ':image_file' => $imageFile,
+        ]);
+
+        Database::commit();
+
+        setFlash('success', "Product '{$name}' updated in database successfully!");
         redirect('/admin/index.php?tab=products');
     } catch (Throwable $e) {
+        Database::rollBack();
         setFlash('danger', 'Update failed: ' . $e->getMessage());
     }
 }
@@ -112,8 +149,7 @@ $pageTitle = 'Edit Product · Admin';
             <label class="form-label fw-semibold">Status</label>
             <select name="status" class="form-select">
               <option value="Active" <?= ($product['Status'] ?? '') === 'Active' ? 'selected' : '' ?>>Active</option>
-              <option value="Hidden" <?= ($product['Status'] ?? '') === 'Hidden' ? 'selected' : '' ?>>Hidden</option>
-              <option value="Sold Out" <?= ($product['Status'] ?? '') === 'Sold Out' ? 'selected' : '' ?>>Sold Out</option>
+              <option value="Archived" <?= ($product['Status'] ?? '') === 'Archived' ? 'selected' : '' ?>>Archived</option>
             </select>
           </div>
         </div>

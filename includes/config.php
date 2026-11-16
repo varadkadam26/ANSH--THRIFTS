@@ -94,21 +94,13 @@ define('ADMIN_PASSWORD', env('ADMIN_PASSWORD', $configParams['admin_password'] ?
 define('RAZORPAY_KEY_ID', env('RAZORPAY_KEY_ID', $configParams['razorpay_key_id'] ?? 'rzp_test_SIIeZtDjS4VRsM'));
 define('RAZORPAY_KEY_SECRET', env('RAZORPAY_KEY_SECRET', $configParams['razorpay_key_secret'] ?? 'jChLBRshmM64ATJ7lLVMEj6T'));
 
-// Google Sheets Config
-define('GOOGLE_SPREADSHEET_ID', env('GOOGLE_SPREADSHEET_ID', '1LW8dyub59pMYU1tCWLIM4hyUcHOvDSEXS-EHJRfK-p8'));
-
-// Determine credentials path (Checks outside public_html first for Hostinger security)
-$credsCandidateOutside = dirname(__DIR__, 2) . '/credentials.json';
-$credsCandidateLocal = __DIR__ . '/../credentials.json';
-$credsEnv = env('GOOGLE_CREDENTIALS_PATH');
-
-if (!empty($credsEnv) && file_exists($credsEnv)) {
-    define('GOOGLE_CREDENTIALS_PATH', $credsEnv);
-} elseif (file_exists($credsCandidateOutside)) {
-    define('GOOGLE_CREDENTIALS_PATH', $credsCandidateOutside);
-} else {
-    define('GOOGLE_CREDENTIALS_PATH', $credsCandidateLocal);
-}
+// Database Configuration (MySQL / MariaDB for Hostinger)
+define('DB_HOST', (string)env('DB_HOST', 'localhost'));
+define('DB_PORT', (int)env('DB_PORT', 3306));
+define('DB_NAME', (string)env('DB_NAME', 'ansh_thrifts'));
+define('DB_USER', (string)env('DB_USER', 'root'));
+define('DB_PASS', (string)env('DB_PASS', ''));
+define('DB_CHARSET', (string)env('DB_CHARSET', 'utf8mb4'));
 
 // Upload directory (absolute & web relative)
 define('UPLOAD_DIR', __DIR__ . '/../static/images/uploads');

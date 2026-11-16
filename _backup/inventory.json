@@ -1,0 +1,75 @@
+[
+  {
+    "Product ID": "PRD-1001",
+    "Product Name": "Washed Black Graphic T-Shirt",
+    "SKU": "SKU-1001",
+    "Stock Quantity": 1,
+    "Reserved Quantity": 0,
+    "Available Quantity": 1,
+    "Low Stock Alert": "Yes"
+  },
+  {
+    "Product ID": "PRD-1002",
+    "Product Name": "Crimson Red Graphic T-Shirt",
+    "SKU": "SKU-1002",
+    "Stock Quantity": 1,
+    "Reserved Quantity": 0,
+    "Available Quantity": 1,
+    "Low Stock Alert": "Yes"
+  },
+  {
+    "Product ID": "PRD-1003",
+    "Product Name": "Charcoal Dark Wash Graphic Tee",
+    "SKU": "SKU-1003",
+    "Stock Quantity": 1,
+    "Reserved Quantity": 0,
+    "Available Quantity": 1,
+    "Low Stock Alert": "Yes"
+  },
+  {
+    "Product ID": "PRD-1004",
+    "Product Name": "Heather Grey Crewneck Tee",
+    "SKU": "SKU-1004",
+    "Stock Quantity": 1,
+    "Reserved Quantity": 0,
+    "Available Quantity": 1,
+    "Low Stock Alert": "Yes"
+  },
+  {
+    "Product ID": "PRD-1005",
+    "Product Name": "Vintage Illustrated Graphic Tee",
+    "SKU": "SKU-1005",
+    "Stock Quantity": 1,
+    "Reserved Quantity": 0,
+    "Available Quantity": 1,
+    "Low Stock Alert": "Yes"
+  },
+  {
+    "Product ID": "PRD-1006",
+    "Product Name": "Vintage Wash Blue Denim Jacket",
+    "SKU": "SKU-1006",
+    "Stock Quantity": 1,
+    "Reserved Quantity": 0,
+    "Available Quantity": 1,
+    "Low Stock Alert": "Yes"
+  },
+  {
+    "Product ID": "PRD-1007",
+    "Product Name": "Black Canvas Zip Bomber Jacket",
+    "SKU": "SKU-1007",
+    "Stock Quantity": 1,
+    "Reserved Quantity": 0,
+    "Available Quantity": 1,
+    "Low Stock Alert": "Yes"
+  },
+  {
+    "Product ID": "PRD-1008",
+    "Product Name": "Distressed Black Streetwear Hoodie",
+    "SKU": "SKU-1008",
+    "Stock Quantity": 1,
+    "Reserved Quantity": 0,
+    "Available Quantity": 1,
+    "Low Stock Alert": "Yes"
+  }
+]
+

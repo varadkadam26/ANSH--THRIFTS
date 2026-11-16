@@ -1,0 +1,83 @@
+[
+  {
+    "ID": "PRD-1001",
+    "Name": "Washed Black Graphic T-Shirt",
+    "Slug": "washed-black-graphic-t-shirt",
+    "Price": 399.00,
+    "Category": "T-Shirts",
+    "Details": "Authentic pre-loved washed black graphic t-shirt featuring front artwork with gentle vintage fading. Soft worn-in cotton feel, casual relaxed silhouette. Single unique piece.",
+    "Image File": "uploads/1.jpeg",
+    "Status": "Active"
+  },
+  {
+    "ID": "PRD-1002",
+    "Name": "Crimson Red Graphic T-Shirt",
+    "Slug": "crimson-red-graphic-t-shirt",
+    "Price": 349.00,
+    "Category": "T-Shirts",
+    "Details": "Vibrant crimson red pre-loved crewneck t-shirt with classic center chest graphic print. Comfortable breathable knit with authentic vintage character. 1-of-1 in stock.",
+    "Image File": "uploads/2.png",
+    "Status": "Active"
+  },
+  {
+    "ID": "PRD-1003",
+    "Name": "Charcoal Dark Wash Graphic Tee",
+    "Slug": "charcoal-dark-wash-graphic-tee",
+    "Price": 399.00,
+    "Category": "T-Shirts",
+    "Details": "Curated charcoal dark wash graphic tee with vintage chest motif. Soft circular pre-owned garment in ready-to-wear condition. Single unique piece.",
+    "Image File": "uploads/3.jpeg",
+    "Status": "Active"
+  },
+  {
+    "ID": "PRD-1004",
+    "Name": "Heather Grey Crewneck Tee",
+    "Slug": "heather-grey-crewneck-tee",
+    "Price": 299.00,
+    "Category": "T-Shirts",
+    "Details": "Classic heather grey pre-loved everyday crewneck t-shirt. Clean minimal aesthetic, lightweight breathable cotton blend, standard comfortable fit. 1-of-1 piece.",
+    "Image File": "uploads/4.jpeg",
+    "Status": "Active"
+  },
+  {
+    "ID": "PRD-1005",
+    "Name": "Vintage Illustrated Graphic Tee",
+    "Slug": "vintage-illustrated-graphic-tee",
+    "Price": 449.00,
+    "Category": "T-Shirts",
+    "Details": "Standout thrifted tee featuring distinctive multi-tone graphic illustration on light grey/heather base. Authentic archival street style with vintage patina.",
+    "Image File": "uploads/5.jpeg",
+    "Status": "Active"
+  },
+  {
+    "ID": "PRD-1006",
+    "Name": "Vintage Wash Blue Denim Jacket",
+    "Slug": "vintage-wash-blue-denim-jacket",
+    "Price": 799.00,
+    "Category": "Jackets",
+    "Details": "Classic heavyweight washed blue denim jacket with front button closure, point collar, and dual chest flap pockets. Authentic vintage fade and timeless outerwear styling.",
+    "Image File": "uploads/6.jpg",
+    "Status": "Active"
+  },
+  {
+    "ID": "PRD-1007",
+    "Name": "Black Canvas Zip Bomber Jacket",
+    "Slug": "black-canvas-zip-bomber-jacket",
+    "Price": 899.00,
+    "Category": "Jackets",
+    "Details": "Substantial pre-loved dark charcoal/black canvas zip-up bomber jacket. Ribbed cuffs and hem, structured workwear-inspired silhouette with clean vintage aesthetic. 1-of-1.",
+    "Image File": "uploads/7.webp",
+    "Status": "Active"
+  },
+  {
+    "ID": "PRD-1008",
+    "Name": "Distressed Black Streetwear Hoodie",
+    "Slug": "distressed-black-streetwear-hoodie",
+    "Price": 699.00,
+    "Category": "Hoodies",
+    "Details": "Heavyweight washed black streetwear pullover hoodie featuring kangaroo pouch pocket, drawstring hood, and vintage sun-faded patina. Perfect cozy pre-loved staple.",
+    "Image File": "uploads/8.webp",
+    "Status": "Active"
+  }
+]
+

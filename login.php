@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/Database.php';
 
 if (isAdminLoggedIn()) {
     redirect('/admin/index.php');
@@ -22,7 +23,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = (string)($_POST['password'] ?? '');
 
-    if ($username === ADMIN_USERNAME && verifyAdminPassword($password)) {
+    $authenticated = false;
+
+    // 1. Check database admins table first
+    try {
+        $db = getDb();
+        $stmt = $db->prepare("SELECT * FROM `admins` WHERE username = :user LIMIT 1");
+        $stmt->execute([':user' => $username]);
+        $admin = $stmt->fetch();
+
+        if ($admin && password_verify($password, (string)$admin['password_hash'])) {
+            $authenticated = true;
+            // Update last login
+            $up = $db->prepare("UPDATE `admins` SET last_login = NOW() WHERE id = :id");
+            $up->execute([':id' => $admin['id']]);
+        }
+    } catch (Throwable $e) {
+        // Fallback to env credentials if DB check encounters an issue
+    }
+
+    // 2. Fallback to .env ADMIN_USERNAME & ADMIN_PASSWORD
+    if (!$authenticated && $username === ADMIN_USERNAME && verifyAdminPassword($password)) {
+        $authenticated = true;
+    }
+
+    if ($authenticated) {
         // Prevent session fixation
         session_regenerate_id(true);
 

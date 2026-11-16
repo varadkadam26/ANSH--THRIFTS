@@ -2,27 +2,88 @@
 /**
  * ANSH THRIFTS — Admin Management Dashboard
  * Full multi-tab view and management: Products, Inventory, Orders, Deliveries, Contact Messages, Customers, Settings.
+ * Powered by MySQL / MariaDB with PDO prepared statements.
  */
 
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/GoogleSheetsService.php';
+require_once __DIR__ . '/../includes/Database.php';
 
 requireAdmin();
 
-$sheets = new GoogleSheetsService();
+$db = getDb();
 $activeTab = trim($_GET['tab'] ?? 'products');
 
-// Data fetching per tab
-$products = $sheets->getAllRecords('Products');
-$inventory = $sheets->getAllRecords('Inventory');
-$orders = $sheets->getAllRecords('Orders');
-$deliveries = $sheets->getAllRecords('Deliveries');
-$contacts = $sheets->getAllRecords('Contact Messages');
-$customers = $sheets->getAllRecords('Customers');
-$settings = $sheets->getAllRecords('Settings');
+// Data fetching per tab from MySQL
+$products = $db->query("
+    SELECT 
+        id AS `ID`, name AS `Name`, slug AS `Slug`, price AS `Price`, 
+        category AS `Category`, details AS `Details`, image_file AS `Image File`, 
+        status AS `Status`, created_at AS `Created At` 
+    FROM `products` 
+    ORDER BY created_at DESC
+")->fetchAll();
+
+$inventory = $db->query("
+    SELECT 
+        i.product_id AS `Product ID`, p.name AS `Product Name`, i.sku AS `SKU`,
+        i.stock_quantity AS `Stock Quantity`, i.reserved_quantity AS `Reserved Quantity`,
+        i.available_quantity AS `Available Quantity`, i.low_stock_alert AS `Low Stock Alert`,
+        i.updated_at AS `Last Updated`
+    FROM `inventory` i
+    JOIN `products` p ON i.product_id = p.id
+    ORDER BY p.name ASC
+")->fetchAll();
+
+$orders = $db->query("
+    SELECT 
+        id AS `Order ID`, customer_name AS `Customer Name`, email AS `Email`, 
+        phone AS `Phone`, total_amount AS `Total Amount`, payment_method AS `Payment Method`, 
+        payment_status AS `Payment Status`, razorpay_order_id AS `Razorpay Order ID`, 
+        razorpay_payment_id AS `Razorpay Payment ID`, shipping_address AS `Shipping Address`, 
+        order_status AS `Order Status`, created_at AS `Created At` 
+    FROM `orders` 
+    ORDER BY created_at DESC
+")->fetchAll();
+
+$deliveries = $db->query("
+    SELECT 
+        id AS `Delivery ID`, order_id AS `Order ID`, recipient_name AS `Recipient Name`, 
+        recipient_phone AS `Recipient Phone`, shipping_address AS `Shipping Address`, 
+        carrier AS `Carrier`, tracking_number AS `Tracking Number`, status AS `Status`, 
+        estimated_delivery AS `Estimated Delivery`, dispatched_at AS `Dispatched At`, 
+        delivered_at AS `Delivered At`, notes AS `Notes` 
+    FROM `deliveries` 
+    ORDER BY created_at DESC
+")->fetchAll();
+
+$contacts = $db->query("
+    SELECT 
+        id AS `Message ID`, sender_name AS `Sender Name`, email AS `Email`, 
+        phone AS `Phone`, subject AS `Subject`, message AS `Message`, 
+        status AS `Status`, received_at AS `Received At`, responded_at AS `Responded At` 
+    FROM `contact_messages` 
+    ORDER BY received_at DESC
+")->fetchAll();
+
+$customers = $db->query("
+    SELECT 
+        customer_id AS `Customer ID`, full_name AS `Full Name`, email AS `Email`, 
+        phone AS `Phone`, total_orders AS `Total Orders`, total_spent AS `Total Spent`, 
+        first_order_date AS `First Order Date`, last_active AS `Last Active` 
+    FROM `customers` 
+    ORDER BY total_spent DESC
+")->fetchAll();
+
+$settings = $db->query("
+    SELECT 
+        setting_key AS `Key`, setting_value AS `Value`, 
+        description AS `Description`, updated_at AS `Last Updated` 
+    FROM `settings` 
+    ORDER BY setting_key ASC
+")->fetchAll();
 
 // Key metrics
 $totalRevenue = 0.0;
@@ -33,7 +94,7 @@ foreach ($orders as $o) {
 }
 $lowStockCount = 0;
 foreach ($inventory as $inv) {
-    if ((int)($inv['Available Quantity'] ?? 0) <= (int)($inv['Low Stock Alert'] ?? 3)) {
+    if ((int)($inv['Available Quantity'] ?? 0) <= 1 || strtolower((string)($inv['Low Stock Alert'] ?? '')) === 'yes') {
         $lowStockCount++;
     }
 }
@@ -112,9 +173,9 @@ $csrfToken = getCsrfToken();
         <?= e(APP_NAME) ?> <span class="badge bg-warning text-dark ms-2 small">Admin</span>
       </a>
       <div class="d-flex align-items-center gap-3">
-        <a href="https://docs.google.com/spreadsheets/d/<?= e(GOOGLE_SPREADSHEET_ID) ?>" target="_blank" class="btn btn-outline-light btn-sm">
-          📊 Open Google Sheet
-        </a>
+        <span class="badge bg-success-subtle text-success border border-success d-none d-md-inline-block px-3 py-2">
+          🗄️ MySQL Database: Connected
+        </span>
         <a href="/index.php" target="_blank" class="btn btn-outline-light btn-sm">
           👁 View Storefront
         </a>
@@ -164,7 +225,7 @@ $csrfToken = getCsrfToken();
       </div>
     </div>
 
-    <!-- Navigation Tabs for Google Sheets -->
+    <!-- Navigation Tabs -->
     <ul class="nav nav-pills mb-4 gap-2 flex-nowrap overflow-auto pb-2" id="adminTabs">
       <li class="nav-item">
         <a class="nav-link <?= $activeTab === 'products' ? 'active' : '' ?>" href="/admin/index.php?tab=products">
@@ -247,10 +308,9 @@ $csrfToken = getCsrfToken();
                 <div class="d-flex gap-1">
                   <a href="/product.php?slug=<?= urlencode($p['Slug'] ?? '') ?>" target="_blank" class="btn btn-outline-info btn-sm" title="View in storefront">👁</a>
                   <a href="/admin/product_edit.php?id=<?= urlencode($p['ID'] ?? '') ?>" class="btn btn-outline-primary btn-sm" title="Edit">Edit</a>
-                  <form action="/admin/product_delete.php" method="POST" class="d-inline" onsubmit="return confirm('Delete this product permanently from Google Sheets?');">
+                  <form action="/admin/product_delete.php" method="POST" class="d-inline" onsubmit="return confirm('Delete this product permanently?');">
                     <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
                     <input type="hidden" name="id" value="<?= e($p['ID'] ?? '') ?>">
-                    <input type="hidden" name="row" value="<?= (int)($p['_row_number'] ?? 0) ?>">
                     <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
                   </form>
                 </div>
@@ -268,7 +328,7 @@ $csrfToken = getCsrfToken();
     <div class="table-container">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Stock & Inventory Management</h4>
-        <small class="text-muted">Live synchronization with Google Sheets Inventory tab</small>
+        <small class="text-muted">Live synchronization with database inventory table</small>
       </div>
 
       <div class="table-responsive">
@@ -289,7 +349,7 @@ $csrfToken = getCsrfToken();
           <tbody>
             <?php foreach ($inventory as $inv): 
               $avail = (int)($inv['Available Quantity'] ?? 0);
-              $alert = (int)($inv['Low Stock Alert'] ?? 3);
+              $alert = 1;
             ?>
             <tr>
               <td><code><?= e($inv['Product ID'] ?? '') ?></code></td>
@@ -333,7 +393,7 @@ $csrfToken = getCsrfToken();
     <div class="table-container">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Customer Orders</h4>
-        <small class="text-muted">Orders synced directly from checkout to Google Sheets</small>
+        <small class="text-muted">Customer orders registered in database</small>
       </div>
 
       <div class="table-responsive">
@@ -355,7 +415,7 @@ $csrfToken = getCsrfToken();
             <?php if (empty($orders)): ?>
               <tr><td colspan="9" class="text-center py-4 text-muted">No orders recorded yet.</td></tr>
             <?php else: ?>
-              <?php foreach (array_reverse($orders) as $ord): ?>
+              <?php foreach ($orders as $ord): ?>
               <tr>
                 <td><code><?= e($ord['Order ID'] ?? '') ?></code></td>
                 <td><strong><?= e($ord['Customer Name'] ?? '') ?></strong></td>
@@ -426,7 +486,7 @@ $csrfToken = getCsrfToken();
             <?php if (empty($deliveries)): ?>
               <tr><td colspan="8" class="text-center py-4 text-muted">No delivery entries yet.</td></tr>
             <?php else: ?>
-              <?php foreach (array_reverse($deliveries) as $del): ?>
+              <?php foreach ($deliveries as $del): ?>
               <tr>
                 <td><code><?= e($del['Delivery ID'] ?? '') ?></code></td>
                 <td><code><?= e($del['Order ID'] ?? '') ?></code></td>
@@ -470,7 +530,7 @@ $csrfToken = getCsrfToken();
     <div class="table-container">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">Customer Inquiries & Messages</h4>
-        <small class="text-muted">Messages submitted through contact.php saved in Google Sheets</small>
+        <small class="text-muted">Customer messages stored in database</small>
       </div>
 
       <div class="table-responsive">
@@ -491,7 +551,7 @@ $csrfToken = getCsrfToken();
             <?php if (empty($contacts)): ?>
               <tr><td colspan="8" class="text-center py-4 text-muted">No messages received yet.</td></tr>
             <?php else: ?>
-              <?php foreach (array_reverse($contacts) as $c): ?>
+              <?php foreach ($contacts as $c): ?>
               <tr>
                 <td><code><?= e($c['Message ID'] ?? '') ?></code></td>
                 <td><strong><?= e($c['Sender Name'] ?? '') ?></strong></td>
@@ -575,7 +635,7 @@ $csrfToken = getCsrfToken();
     <?php if ($activeTab === 'settings'): ?>
     <div class="table-container">
       <h4 class="mb-3">Store Configuration Settings</h4>
-      <p class="text-muted small">Managed within the Google Sheets Settings tab.</p>
+      <p class="text-muted small">Store configuration parameters stored in database.</p>
 
       <div class="table-responsive">
         <table class="table table-hover align-middle">
@@ -605,7 +665,7 @@ $csrfToken = getCsrfToken();
   </div>
 
   <footer class="py-3 bg-dark text-white-50 text-center small mt-auto">
-    &copy; <?= date('Y') ?> <?= e(APP_NAME) ?> Admin Panel · Connected to Google Sheets API v4
+    &copy; <?= date('Y') ?> <?= e(APP_NAME) ?> Admin Panel · Powered by MySQL / MariaDB
   </footer>
 
   <script src="/static/js/bootstrap.bundle.min.js"></script>
