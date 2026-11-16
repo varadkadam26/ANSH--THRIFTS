@@ -94,12 +94,12 @@ define('ADMIN_PASSWORD', env('ADMIN_PASSWORD', $configParams['admin_password'] ?
 define('RAZORPAY_KEY_ID', env('RAZORPAY_KEY_ID', $configParams['razorpay_key_id'] ?? 'rzp_test_SIIeZtDjS4VRsM'));
 define('RAZORPAY_KEY_SECRET', env('RAZORPAY_KEY_SECRET', $configParams['razorpay_key_secret'] ?? 'jChLBRshmM64ATJ7lLVMEj6T'));
 
-// Database Configuration (MySQL / MariaDB for Hostinger)
+// Database Configuration (Hostinger MySQL / MariaDB)
 define('DB_HOST', (string)env('DB_HOST', 'localhost'));
 define('DB_PORT', (int)env('DB_PORT', 3306));
-define('DB_NAME', (string)env('DB_NAME', 'ansh_thrifts'));
-define('DB_USER', (string)env('DB_USER', 'root'));
-define('DB_PASS', (string)env('DB_PASS', ''));
+define('DB_DATABASE', (string)env('DB_DATABASE', ''));
+define('DB_USERNAME', (string)env('DB_USERNAME', ''));
+define('DB_PASSWORD', (string)env('DB_PASSWORD', ''));
 define('DB_CHARSET', (string)env('DB_CHARSET', 'utf8mb4'));
 
 // Upload directory (absolute & web relative)

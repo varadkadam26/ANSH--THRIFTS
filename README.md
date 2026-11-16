@@ -82,9 +82,9 @@ Hostinger supports Apache / LiteSpeed web servers with PHP 8.2+ and MySQL / Mari
    # Database Configuration
    DB_HOST=localhost
    DB_PORT=3306
-   DB_NAME=u123456789_ansh
-   DB_USER=u123456789_ansh
-   DB_PASS=YourDatabasePassword
+   DB_DATABASE=u761076349_ANSH_THRIFTS
+   DB_USERNAME=u761076349_ANSH
+   DB_PASSWORD=YourDatabasePassword
    DB_CHARSET=utf8mb4
 
    # Admin Credentials

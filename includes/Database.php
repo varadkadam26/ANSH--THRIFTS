@@ -18,12 +18,16 @@ class Database {
      */
     public static function getInstance(): PDO {
         if (self::$instance === null) {
-            $host = defined('DB_HOST') ? DB_HOST : 'localhost';
-            $port = defined('DB_PORT') ? (int)DB_PORT : 3306;
-            $dbname = defined('DB_NAME') ? DB_NAME : 'ansh_thrifts';
-            $user = defined('DB_USER') ? DB_USER : 'root';
-            $pass = defined('DB_PASS') ? DB_PASS : '';
-            $charset = defined('DB_CHARSET') ? DB_CHARSET : 'utf8mb4';
+            $host = defined('DB_HOST') && DB_HOST !== '' ? DB_HOST : (string)env('DB_HOST', 'localhost');
+            $port = defined('DB_PORT') && DB_PORT !== 0 ? (int)DB_PORT : (int)env('DB_PORT', 3306);
+            $dbname = defined('DB_DATABASE') && DB_DATABASE !== '' ? DB_DATABASE : (string)env('DB_DATABASE', '');
+            $user = defined('DB_USERNAME') && DB_USERNAME !== '' ? DB_USERNAME : (string)env('DB_USERNAME', '');
+            $pass = defined('DB_PASSWORD') ? DB_PASSWORD : (string)env('DB_PASSWORD', '');
+            $charset = defined('DB_CHARSET') && DB_CHARSET !== '' ? DB_CHARSET : (string)env('DB_CHARSET', 'utf8mb4');
+
+            if ($dbname === '' || $user === '') {
+                throw new RuntimeException("Database configuration error: DB_DATABASE and DB_USERNAME are required.");
+            }
 
             $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset={$charset}";
 
